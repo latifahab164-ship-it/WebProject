@@ -1,0 +1,61 @@
+<?php
+
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
+
+// Check if an image was uploaded
+if (!isset($_FILES["image"]) || $_FILES["image"]["error"] != 0) {
+    die("Error uploading image.");
+}
+
+// Get the uploaded image and selected filter
+$imageFile = $_FILES["image"]["tmp_name"];
+$filter = $_POST["filter"];
+
+// Create an image from the uploaded file
+$imageData = file_get_contents($imageFile);
+$image = imagecreatefromstring($imageData);
+
+if ($image === false) {
+    die("Invalid image.");
+}
+
+// Apply the selected filter
+if ($filter == "edge") {
+
+    imagefilter($image, IMG_FILTER_EDGEDETECT);
+
+} elseif ($filter == "grayscale") {
+
+    imagefilter($image, IMG_FILTER_GRAYSCALE);
+
+} elseif ($filter == "reverse") {
+
+    imagefilter($image, IMG_FILTER_NEGATE);
+
+} elseif ($filter == "pixelation") {
+
+    imagefilter($image, IMG_FILTER_PIXELATE, 10, true);
+
+}
+
+// Return the filtered image directly to the browser
+header("Content-Type: image/jpeg");
+
+imagejpeg($image);
+
+imagedestroy($image);
+
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+echo "PHP works<br>";
+
+if (extension_loaded('gd')) {
+    echo "GD works";
+} else {
+    echo "GD NOT enabled";
+}
+
+?>

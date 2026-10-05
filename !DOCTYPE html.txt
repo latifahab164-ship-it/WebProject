@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Filter</title>
+</head>
+
+<body>
+
+    <h2>Image Filtering</h2>
+
+    <form action="filterImage.php" method="POST" enctype="multipart/form-data">
+
+        <label>Upload Image:</label>
+        <input type="file" name="image" accept="image/*" required>
+
+        <br><br>
+
+        <label>Select Filter:</label>
+        <select name="filter" required>
+            <option value="edge">Edge Detection</option>
+            <option value="grayscale">Grayscale</option>
+            <option value="reverse">Color Reverse</option>
+            <option value="pixelation">Pixelation</option>
+        </select>
+
+        <br><br>
+
+        <input type="submit" value="Filter Image">
+
+    </form>
+
+</body>
+</html>
