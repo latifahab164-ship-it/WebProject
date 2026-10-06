@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Filter</title>
+
+    <style>
+
+        body {
+            margin: 0;
+            background-color: #f4fafa;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 430px;
+            margin: 70px auto;
+            text-align: center;
+        }
+
+        .logo {
+            font-family: "Brush Script MT", "Segoe Script", cursive;
+            font-size: 70px;
+            font-weight: bold;
+            color: #263238;
+            margin: 0;
+        }
+
+        .logo span {
+            color: #45bdb8;
+        }
+
+        .subtitle {
+            color: #7a8b8b;
+            font-size: 15px;
+            margin-top: 5px;
+            margin-bottom: 30px;
+        }
+
+        form {
+            background-color: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            color: #37474f;
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d5e4e4;
+            border-radius: 10px;
+            background-color: #f9fdfd;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        input[type="file"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #45bdb8;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 13px;
+            margin-top: 5px;
+
+            background-color: #45bdb8;
+            color: white;
+
+            border: none;
+            border-radius: 10px;
+
+            font-size: 16px;
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #359f9a;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1 class="logo">Image <span>Filter</span></h1>
+
+        <p class="subtitle">
+            Transform your image with a filter
+        </p>
+
+        <form action="filterImage.php" method="POST" enctype="multipart/form-data">
+
+            <label>Upload Image:</label>
+
+            <input type="file"
+                   name="image"
+                   accept="image/*"
+                   required>
+
+            <br><br>
+
+            <label>Select Filter:</label>
+
+            <select name="filter" required>
+
+                <option value="edge">
+                    Edge Detection
+                </option>
+
+                <option value="grayscale">
+                    Grayscale
+                </option>
+
+                <option value="reverse">
+                    Color Reverse
+                </option>
+
+                <option value="pixelation">
+                    Pixelation
+                </option>
+
+            </select>
+
+            <br><br>
+
+            <input type="submit" value="Filter Image">
+
+        </form>
+
+    </div>
+
+</body>
+</html>
