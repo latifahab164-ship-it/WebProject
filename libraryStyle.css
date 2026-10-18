@@ -1,0 +1,67 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+header img {
+    height: 50px;
+    margin-right: 15px;
+}
+
+.horizontal-scroll {
+    display: flex;
+    overflow-x: auto;
+    list-style: none;
+    padding: 10px;
+    background: #fff;
+    border: 1px solid #ddd;
+    gap: 15px;
+}
+
+.horizontal-scroll li {
+    flex: 0 0 auto;
+}
+
+.horizontal-scroll img {
+    width: 120px;
+    height: 180px;
+    object-fit: cover;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.book-details {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.book-details img {
+    width: 200px;
+    height: 300px;
+    object-fit: cover;
+    margin: 15px 0;
+}
+
+.back-btn {
+    text-decoration: none;
+    background: #eee;
+    padding: 8px 15px;
+    border-radius: 4px;
+    color: #333;
+    margin-right: 20px;
+}
