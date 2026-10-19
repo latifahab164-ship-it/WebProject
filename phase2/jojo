@@ -1,254 +1,141 @@
-/* =========================
-   General Page Style
-   ========================= */
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-* {
-    box-sizing: border-box;
+$conn = new mysqli("localhost", "root", "root", "LibraryDatabase");
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-body {
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #f5f7fb;
-    color: #253044;
-}
-
-
-/* =========================
-   Header
-   ========================= */
+$conn->set_charset("utf8mb4");
+?>
 
-.site-header {
-    background-color: #ffffff;
-    border-bottom: 1px solid #dfe5ee;
-    padding: 18px 35px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
+<!DOCTYPE html>
+<html lang="en">
 
-.logo {
-    width: 65px;
-    height: 65px;
-    object-fit: contain;
-}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-.brand-text h1 {
-    margin: 0;
-    font-size: 28px;
-    color: #203864;
-}
+    <title>Book Library</title>
 
-.brand-text p {
-    margin: 4px 0 0;
-    color: #7a8496;
-    font-size: 14px;
-}
+    <link rel="stylesheet" href="libraryStyle.css">
+</head>
 
+<body>
 
-/* =========================
-   Main Page
-   ========================= */
+    <header class="site-header">
 
-.library-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 35px 30px;
-}
+        <div class="brand">
 
-.page-heading {
-    margin-bottom: 35px;
-}
+            <img
+                src="Images/logo.png"
+                alt="Book Library Logo"
+                class="logo"
+            >
 
-.page-heading h2 {
-    margin: 0;
-    font-size: 32px;
-    color: #203864;
-}
+            <div class="brand-text">
+                <h1>Book Library</h1>
+                <p>Explore our collection</p>
+            </div>
 
-.page-heading p {
-    margin-top: 8px;
-    color: #7a8496;
-}
+        </div>
 
+    </header>
 
-/* =========================
-   Category
-   ========================= */
 
-.category-section {
-    margin-bottom: 40px;
-}
+    <main class="library-container">
 
-.category-title {
-    font-size: 21px;
-    color: #334e78;
-    margin-bottom: 14px;
-}
+        <div class="page-heading">
+            <h2>All Library Books</h2>
+            <p>Browse books by category</p>
+        </div>
 
 
-/* =========================
-   Horizontal Book List
-   ========================= */
+        <?php
 
-.horizontal-scroll {
-    display: flex;
-    overflow-x: auto;
-    gap: 20px;
+        $catResult = $conn->query("SELECT * FROM Category ORDER BY ID");
 
-    list-style: none;
+        while ($cat = $catResult->fetch_assoc()) {
 
-    margin: 0;
-    padding: 22px;
+            $categoryName = $cat['category'];
+            $categoryID = (int)$cat['ID'];
 
-    background-color: #ffffff;
+            echo '<section class="category-section">';
 
-    border: 1px solid #e1e6ef;
-    border-radius: 12px;
+            echo '<h3 class="category-title">';
+            echo 'Books in ' . htmlspecialchars($categoryName) . ' Category';
+            echo '</h3>';
 
-    scroll-behavior: smooth;
-}
+            echo '<ul class="horizontal-scroll">';
 
 
-/* Scroll bar */
+            $booksResult = $conn->query(
+                "SELECT * FROM Books
+                 WHERE categoryID = $categoryID
+                 ORDER BY title"
+            );
 
-.horizontal-scroll::-webkit-scrollbar {
-    height: 8px;
-}
 
-.horizontal-scroll::-webkit-scrollbar-track {
-    background-color: #eef1f5;
-    border-radius: 10px;
-}
+            while ($book = $booksResult->fetch_assoc()) {
 
-.horizontal-scroll::-webkit-scrollbar-thumb {
-    background-color: #aeb9ca;
-    border-radius: 10px;
-}
+                $isbn = $book['ISBN'];
+                $title = $book['title'];
 
+                $imagePath =
+                    "BookCovers/"
+                    . $categoryName
+                    . "/"
+                    . $isbn
+                    . ".png";
 
-/* =========================
-   Book Card
-   ========================= */
 
-.book-item {
-    flex: 0 0 auto;
-    width: 145px;
-}
+                echo '<li class="book-item">';
 
-.book-link {
-    display: block;
+                echo '<a class="book-link"
+                         href="displayBook.php?isbn='
+                         . urlencode($isbn)
+                         . '">';
 
-    text-decoration: none;
-    color: #253044;
 
-    background-color: #ffffff;
+                echo '<img class="book-cover"
+                         src="'
+                         . htmlspecialchars($imagePath)
+                         . '"
+                         alt="'
+                         . htmlspecialchars($title)
+                         . '">';
 
-    padding: 10px;
 
-    border: 1px solid transparent;
-    border-radius: 10px;
+                echo '<span class="book-title">';
+                echo htmlspecialchars($title);
+                echo '</span>';
 
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        border-color 0.2s ease;
-}
 
-.book-link:hover {
-    transform: translateY(-5px);
+                echo '</a>';
 
-    border-color: #cbd5e1;
+                echo '</li>';
+            }
 
-    box-shadow:
-        0 8px 18px
-        rgba(0, 0, 0, 0.12);
-}
 
+            echo '</ul>';
 
-/* =========================
-   Book Cover
-   ========================= */
+            echo '</section>';
+        }
 
-.book-cover {
-    display: block;
 
-    width: 125px;
-    height: 185px;
+        $conn->close();
 
-    object-fit: cover;
+        ?>
 
-    margin: 0 auto;
+    </main>
 
-    border-radius: 6px;
 
-    box-shadow:
-        0 3px 10px
-        rgba(0, 0, 0, 0.15);
-}
+    <footer class="site-footer">
+        <p>Book Library</p>
+    </footer>
 
+</body>
 
-/* =========================
-   Book Title
-   ========================= */
-
-.book-title {
-    display: block;
-
-    margin-top: 10px;
-
-    font-size: 13px;
-    font-weight: bold;
-
-    line-height: 1.4;
-
-    text-align: center;
-}
-
-
-/* =========================
-   Footer
-   ========================= */
-
-.site-footer {
-    margin-top: 30px;
-    padding: 20px;
-
-    text-align: center;
-
-    background-color: #ffffff;
-
-    border-top: 1px solid #dfe5ee;
-
-    color: #7a8496;
-
-    font-size: 13px;
-}
-
-
-/* =========================
-   Responsive Design
-   ========================= */
-
-@media (max-width: 600px) {
-
-    .site-header {
-        padding: 15px 20px;
-    }
-
-    .library-container {
-        padding: 25px 15px;
-    }
-
-    .brand-text h1 {
-        font-size: 23px;
-    }
-
-    .page-heading h2 {
-        font-size: 26px;
-    }
-}
+</html>
