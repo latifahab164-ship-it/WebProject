@@ -1,79 +1,254 @@
-<?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+/* =========================
+   General Page Style
+   ========================= */
 
-$conn = new mysqli("localhost", "root", "root", "LibraryDatabase");
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+* {
+    box-sizing: border-box;
 }
-?>
 
-<!DOCTYPE html>
-<html lang="en">
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f5f7fb;
+    color: #253044;
+}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Book Library</title>
-    <link rel="stylesheet" href="libraryStyle.css">
-</head>
 
-<body>
+/* =========================
+   Header
+   ========================= */
 
-    <header>
-        <img src="Images/logo.png" alt="Logo">
-        <h1>Book Library Name</h1>
-    </header>
+.site-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #dfe5ee;
+    padding: 18px 35px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
 
-    <main>
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
 
-        <h2>All Library Books</h2>
+.logo {
+    width: 65px;
+    height: 65px;
+    object-fit: contain;
+}
 
-        <?php
-        $catResult = $conn->query("SELECT * FROM Category");
+.brand-text h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #203864;
+}
 
-        while ($cat = $catResult->fetch_assoc()) {
+.brand-text p {
+    margin: 4px 0 0;
+    color: #7a8496;
+    font-size: 14px;
+}
 
-            echo "<h3>Books in " . $cat['category'] . " Category</h3>";
 
-            echo '<ul class="horizontal-scroll">';
+/* =========================
+   Main Page
+   ========================= */
 
-            $catID = $cat['ID'];
+.library-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 35px 30px;
+}
 
-            $booksResult = $conn->query(
-                "SELECT * FROM Books WHERE categoryID = $catID"
-            );
+.page-heading {
+    margin-bottom: 35px;
+}
 
-            while ($book = $booksResult->fetch_assoc()) {
+.page-heading h2 {
+    margin: 0;
+    font-size: 32px;
+    color: #203864;
+}
 
-                $isbn = $book['ISBN'];
+.page-heading p {
+    margin-top: 8px;
+    color: #7a8496;
+}
 
-                $imagePath = "BookCovers/"
-                    . $cat['category']
-                    . "/"
-                    . $isbn
-                    . ".png";
 
-                echo '<li>';
+/* =========================
+   Category
+   ========================= */
 
-                echo '<a href="displayBook.php?isbn=' . $isbn . '">';
+.category-section {
+    margin-bottom: 40px;
+}
 
-                echo '<img src="' . $imagePath
-                    . '" alt="' . $book['title'] . '">';
+.category-title {
+    font-size: 21px;
+    color: #334e78;
+    margin-bottom: 14px;
+}
 
-                echo '</a>';
 
-                echo '</li>';
-            }
+/* =========================
+   Horizontal Book List
+   ========================= */
 
-            echo '</ul>';
-        }
+.horizontal-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 20px;
 
-        $conn->close();
-        ?>
+    list-style: none;
 
-    </main>
+    margin: 0;
+    padding: 22px;
 
-</body>
+    background-color: #ffffff;
 
-</html>
+    border: 1px solid #e1e6ef;
+    border-radius: 12px;
+
+    scroll-behavior: smooth;
+}
+
+
+/* Scroll bar */
+
+.horizontal-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.horizontal-scroll::-webkit-scrollbar-track {
+    background-color: #eef1f5;
+    border-radius: 10px;
+}
+
+.horizontal-scroll::-webkit-scrollbar-thumb {
+    background-color: #aeb9ca;
+    border-radius: 10px;
+}
+
+
+/* =========================
+   Book Card
+   ========================= */
+
+.book-item {
+    flex: 0 0 auto;
+    width: 145px;
+}
+
+.book-link {
+    display: block;
+
+    text-decoration: none;
+    color: #253044;
+
+    background-color: #ffffff;
+
+    padding: 10px;
+
+    border: 1px solid transparent;
+    border-radius: 10px;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.book-link:hover {
+    transform: translateY(-5px);
+
+    border-color: #cbd5e1;
+
+    box-shadow:
+        0 8px 18px
+        rgba(0, 0, 0, 0.12);
+}
+
+
+/* =========================
+   Book Cover
+   ========================= */
+
+.book-cover {
+    display: block;
+
+    width: 125px;
+    height: 185px;
+
+    object-fit: cover;
+
+    margin: 0 auto;
+
+    border-radius: 6px;
+
+    box-shadow:
+        0 3px 10px
+        rgba(0, 0, 0, 0.15);
+}
+
+
+/* =========================
+   Book Title
+   ========================= */
+
+.book-title {
+    display: block;
+
+    margin-top: 10px;
+
+    font-size: 13px;
+    font-weight: bold;
+
+    line-height: 1.4;
+
+    text-align: center;
+}
+
+
+/* =========================
+   Footer
+   ========================= */
+
+.site-footer {
+    margin-top: 30px;
+    padding: 20px;
+
+    text-align: center;
+
+    background-color: #ffffff;
+
+    border-top: 1px solid #dfe5ee;
+
+    color: #7a8496;
+
+    font-size: 13px;
+}
+
+
+/* =========================
+   Responsive Design
+   ========================= */
+
+@media (max-width: 600px) {
+
+    .site-header {
+        padding: 15px 20px;
+    }
+
+    .library-container {
+        padding: 25px 15px;
+    }
+
+    .brand-text h1 {
+        font-size: 23px;
+    }
+
+    .page-heading h2 {
+        font-size: 26px;
+    }
+}
