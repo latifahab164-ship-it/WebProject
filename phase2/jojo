@@ -1,14 +1,144 @@
 <?php
+session_start();
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$conn = new mysqli("localhost", "root", "root", "LibraryDatabase");
+// Connect to the database
+$conn = new mysqli("localhost", "root", "root", "LibraryDatabase2");
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
 $conn->set_charset("utf8mb4");
+
+$error = "";
+
+// Check if the form was submitted
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    $action = isset($_POST["action"]) ? $_POST["action"] : "";
+
+    // =========================
+    // SIGN UP
+    // =========================
+    if ($action === "signup") {
+
+        $name = isset($_POST["name"]) ? trim($_POST["name"]) : "";
+        $email = isset($_POST["email"]) ? trim($_POST["email"]) : "";
+        $password = isset($_POST["password"]) ? $_POST["password"] : "";
+
+        if ($name === "" || $email === "" || $password === "") {
+            $error = "Please fill in all fields.";
+        } else {
+
+            // Check if the email is already registered
+            $stmt = $conn->prepare(
+                "SELECT ID FROM Users WHERE email = ?"
+            );
+
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows > 0) {
+
+                $error = "This email is already registered.";
+                $stmt->close();
+
+            } else {
+
+                $stmt->close();
+
+                // Hash the password before storing it
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+                // Add the new user
+                $stmt = $conn->prepare(
+                    "INSERT INTO Users (name, email, password)
+                     VALUES (?, ?, ?)"
+                );
+
+                $stmt->bind_param(
+                    "sss",
+                    $name,
+                    $email,
+                    $hashedPassword
+                );
+
+                if ($stmt->execute()) {
+
+                    // Save user's ID and name in the session
+                    $_SESSION["userID"] = $conn->insert_id;
+                    $_SESSION["userName"] = $name;
+
+                    $stmt->close();
+                    $conn->close();
+
+                    // Redirect to the home page
+                    header("Location: index.php");
+                    exit();
+
+                } else {
+                    $error = "Signup failed. Please try again.";
+                    $stmt->close();
+                }
+            }
+        }
+    }
+
+    // =========================
+    // LOGIN
+    // =========================
+    elseif ($action === "login") {
+
+        $email = isset($_POST["email"]) ? trim($_POST["email"]) : "";
+        $password = isset($_POST["password"]) ? $_POST["password"] : "";
+
+        if ($email === "" || $password === "") {
+
+            $error = "Please fill in all fields.";
+
+        } else {
+
+            // Find the user by email
+            $stmt = $conn->prepare(
+                "SELECT ID, name, password
+                 FROM Users
+                 WHERE email = ?"
+            );
+
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
+
+            // Check email and password
+            if ($user && password_verify($password, $user["password"])) {
+
+                // Save user's ID and name in the session
+                $_SESSION["userID"] = $user["ID"];
+                $_SESSION["userName"] = $user["name"];
+
+                $stmt->close();
+                $conn->close();
+
+                // Redirect to the home page
+                header("Location: index.php");
+                exit();
+
+            } else {
+
+                $error = "Incorrect email or password.";
+                $stmt->close();
+            }
+        }
+    }
+}
+
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -18,124 +148,170 @@ $conn->set_charset("utf8mb4");
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Book Library</title>
+    <title>Login - Book Library</title>
 
     <link rel="stylesheet" href="libraryStyle.css">
 </head>
 
 <body>
 
-    <header class="site-header">
+<header>
+    <a href="index.php" class="back-btn">&larr; Back</a>
 
-        <div class="brand">
+    <img src="Images/logo.png" alt="Logo">
 
-            <img
-                src="Images/logo.png"
-                alt="Book Library Logo"
-                class="logo"
+    <h1>Book Library Name</h1>
+</header>
+
+
+<main class="login-page">
+
+    <h2>User Account</h2>
+
+    <?php if ($error !== ""): ?>
+        <p class="error-message">
+            <?php echo htmlspecialchars($error); ?>
+        </p>
+    <?php endif; ?>
+
+
+    <!-- =========================
+         LOGIN FORM
+         ========================= -->
+
+    <div id="loginForm">
+
+        <h2>Login</h2>
+
+        <form method="POST" action="login.php">
+
+            <input
+                type="hidden"
+                name="action"
+                value="login"
             >
 
-            <div class="brand-text">
-                <h1>Book Library</h1>
-                <p>Explore our collection</p>
-            </div>
+            <label for="loginEmail">Email:</label>
 
-        </div>
+            <input
+                type="email"
+                id="loginEmail"
+                name="email"
+                required
+            >
 
-    </header>
+            <label for="loginPassword">Password:</label>
 
+            <input
+                type="password"
+                id="loginPassword"
+                name="password"
+                required
+            >
 
-    <main class="library-container">
+            <button type="submit">
+                Login
+            </button>
 
-        <div class="page-heading">
-            <h2>All Library Books</h2>
-            <p>Browse books by category</p>
-        </div>
+        </form>
 
+        <p>
+            Don't have an account?
 
-        <?php
+            <button
+                type="button"
+                onclick="showSignup()"
+            >
+                Sign Up
+            </button>
+        </p>
 
-        $catResult = $conn->query("SELECT * FROM Category ORDER BY ID");
-
-        while ($cat = $catResult->fetch_assoc()) {
-
-            $categoryName = $cat['category'];
-            $categoryID = (int)$cat['ID'];
-
-            echo '<section class="category-section">';
-
-            echo '<h3 class="category-title">';
-            echo 'Books in ' . htmlspecialchars($categoryName) . ' Category';
-            echo '</h3>';
-
-            echo '<ul class="horizontal-scroll">';
-
-
-            $booksResult = $conn->query(
-                "SELECT * FROM Books
-                 WHERE categoryID = $categoryID
-                 ORDER BY title"
-            );
+    </div>
 
 
-            while ($book = $booksResult->fetch_assoc()) {
+    <!-- =========================
+         SIGNUP FORM
+         ========================= -->
 
-                $isbn = $book['ISBN'];
-                $title = $book['title'];
+    <div id="signupForm" style="display: none;">
 
-                $imagePath =
-                    "BookCovers/"
-                    . $categoryName
-                    . "/"
-                    . $isbn
-                    . ".png";
+        <h2>Sign Up</h2>
+
+        <form method="POST" action="login.php">
+
+            <input
+                type="hidden"
+                name="action"
+                value="signup"
+            >
+
+            <label for="signupName">Name:</label>
+
+            <input
+                type="text"
+                id="signupName"
+                name="name"
+                required
+            >
+
+            <label for="signupEmail">Email:</label>
+
+            <input
+                type="email"
+                id="signupEmail"
+                name="email"
+                required
+            >
+
+            <label for="signupPassword">Password:</label>
+
+            <input
+                type="password"
+                id="signupPassword"
+                name="password"
+                required
+            >
+
+            <button type="submit">
+                Sign Up
+            </button>
+
+        </form>
+
+        <p>
+            Already have an account?
+
+            <button
+                type="button"
+                onclick="showLogin()"
+            >
+                Login
+            </button>
+        </p>
+
+    </div>
+
+</main>
 
 
-                echo '<li class="book-item">';
+<script>
 
-                echo '<a class="book-link"
-                         href="displayBook.php?isbn='
-                         . urlencode($isbn)
-                         . '">';
+function showSignup() {
 
+    document.getElementById("loginForm").style.display = "none";
 
-                echo '<img class="book-cover"
-                         src="'
-                         . htmlspecialchars($imagePath)
-                         . '"
-                         alt="'
-                         . htmlspecialchars($title)
-                         . '">';
+    document.getElementById("signupForm").style.display = "block";
+}
 
 
-                echo '<span class="book-title">';
-                echo htmlspecialchars($title);
-                echo '</span>';
+function showLogin() {
 
+    document.getElementById("signupForm").style.display = "none";
 
-                echo '</a>';
+    document.getElementById("loginForm").style.display = "block";
+}
 
-                echo '</li>';
-            }
-
-
-            echo '</ul>';
-
-            echo '</section>';
-        }
-
-
-        $conn->close();
-
-        ?>
-
-    </main>
-
-
-    <footer class="site-footer">
-        <p>Book Library</p>
-    </footer>
+</script>
 
 </body>
-
 </html>
