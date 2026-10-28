@@ -156,7 +156,6 @@ $conn->close();
 <body>
 
 <header>
-    <a href="index.php" class="back-btn">&larr; Back</a>
 
     <img src="Images/logo.png" alt="Logo">
 
